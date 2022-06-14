@@ -43,6 +43,9 @@ class PyGuessTypeProvider : PyTypeProviderBase() {
             return super.getReturnType(callable, context)
         }
         val typesName = TypePredictor.predictReturnType(callable)
+        if (typesName.isEmpty()) {
+            return null
+        }
         return Ref.create(
             PyUnionType.union(
                 typesName.map {
