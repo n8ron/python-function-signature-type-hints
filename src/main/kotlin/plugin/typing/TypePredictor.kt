@@ -19,11 +19,13 @@ class TypePredictor {
             )
             val functionName = function.qualifiedName
             val jsonObject = JsonParser.parseReader(reader).asJsonObject
-            val jsonArray = jsonObject[functionName].asJsonArray
+            val jsonArray = jsonObject[functionName]?.asJsonArray
             val paramNameToTypes = mutableMapOf<String, MutableList<String>>()
-            for (functionSignature in GSON.fromJson(jsonArray, Array<FunctionSignature>::class.java)) {
-                functionSignature.argumentTypes.forEach {
-                    (name, type) -> paramNameToTypes.getOrPut(name){mutableListOf()}.add(type)
+            if (jsonArray != null) {
+                for (functionSignature in GSON.fromJson(jsonArray, Array<FunctionSignature>::class.java)) {
+                    functionSignature.argumentTypes.forEach { (name, type) ->
+                        paramNameToTypes.getOrPut(name) { mutableListOf() }.add(type)
+                    }
                 }
             }
             return paramNameToTypes
@@ -35,7 +37,6 @@ class TypePredictor {
             )
             val functionName = function.qualifiedName
             val jsonObject = JsonParser.parseReader(reader).asJsonObject
-            println(jsonObject)
             return jsonObject[functionName]?.let { functionSignatures ->
                 GSON.fromJson(functionSignatures.asJsonArray, Array<FunctionSignature>::class.java).map {
                     it.returnValueType
